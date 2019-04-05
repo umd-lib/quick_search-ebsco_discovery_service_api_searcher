@@ -1,0 +1,27 @@
+# Configuration
+#
+# Replace the following placeholders with the correct values for
+# your installation.
+#
+# <SEARCH_URL>: The URL for performing the search
+# <QUERY_PARAMS>: Any HTTP query parameters that should be included in the search
+# <HIPPO_SITE_URL>: The URL for the Hippo site
+
+defaults: &defaults
+  username: '<YOUR_USERNAME>'
+  password: '<YOUR_PASSWORD>'
+  loaded_link: '<LOADED_LINK>'
+  url_link: '<URL_LINK>'
+  doi_link: '<DOI_LINK>'
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+staging:
+  <<: *defaults
+
+production:
+  <<: *defaults

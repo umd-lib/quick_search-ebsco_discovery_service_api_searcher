@@ -1,0 +1,18 @@
+# Localization
+#
+# Replace the following placeholders with the correct values for
+# your installation.
+#
+# <NO_RESULTS_LINK>: The link for your site when there are no results
+
+en:
+  ebsco_discovery_service_api_search:
+    display_name: "EBSCO Discovery Service API"
+    short_display_name: "EBSCO Discovery Service API"
+    search_form_placeholder: "Search EBSCO Discovery Service API"
+    module_callout: "Search EBSCO Discovery Service API"
+    error_service_message: "searching EBSCO Discovery Service API"
+    no_results_service_message:
+      "a different search from EBSCO Discovery Service API"
+    no_results_link: "<NO_RESULTS_LINK>"
+
