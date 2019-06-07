@@ -18,14 +18,6 @@ module QuickSearch
       get_config('url_link') + "&db=" + record.eds_database_id + "&AN=" + record.eds_accession_number
     end
 
-    # Returns the sanitized search query entered by the user, skipping
-    # the default QuickSearch query filtering
-    def sanitized_user_search_query
-      # Need to use "to_str" as otherwise Japanese text isn't returned
-      # properly
-      sanitize(@q).to_str
-    end
-
     def items_per_page
       allowed_values = [10, 25, 50, 100]
       allowed_values.each do |val|
