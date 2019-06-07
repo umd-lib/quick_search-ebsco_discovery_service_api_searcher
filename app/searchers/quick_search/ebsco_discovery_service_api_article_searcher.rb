@@ -3,7 +3,6 @@
 module QuickSearch
   # QuickSearch seacher for WorldCat
   class EbscoDiscoveryServiceApiArticleSearcher < EbscoDiscoveryServiceApiSearcher
-
     def query_params
       article_filter = { 'eds_publication_type_facet' => ['Academic Journals'] }
       {
@@ -15,7 +14,7 @@ module QuickSearch
 
     def item_link(record)
       return get_config('doi_link') + record.eds_document_doi if record.eds_document_doi
-      get_config('url_link') + "&db=" + record.eds_database_id + "&AN=" + record.eds_accession_number
+      get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
     end
 
     def items_per_page

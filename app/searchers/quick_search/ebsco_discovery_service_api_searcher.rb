@@ -3,13 +3,12 @@
 module QuickSearch
   # QuickSearch seacher for WorldCat
   class EbscoDiscoveryServiceApiSearcher < QuickSearch::Searcher
-
     def session
       return @eds_session if @eds_session
       # Get the configuration values
       username = get_config('username')
       password = get_config('password')
-      @eds_session = EBSCO::EDS::Session.new({user: username, pass: password, profile: 'edsapi', guest: false})
+      @eds_session = EBSCO::EDS::Session.new(user: username, pass: password, profile: 'edsapi', guest: false)
       @eds_session
     end
 
@@ -47,7 +46,7 @@ module QuickSearch
     end
 
     def item_link(record)
-      get_config('url_link') + "&db=" + record.eds_database_id + "&AN=" + record.eds_accession_number
+      get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
     end
 
     # Returns the percent-encoded search query entered by the user, skipping
