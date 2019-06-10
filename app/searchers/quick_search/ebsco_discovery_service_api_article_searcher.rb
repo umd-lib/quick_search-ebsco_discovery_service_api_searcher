@@ -3,7 +3,6 @@
 module QuickSearch
   # QuickSearch seacher for WorldCat
   class EbscoDiscoveryServiceApiArticleSearcher < EbscoDiscoveryServiceApiSearcher
-
     def query_params
       article_filter = { 'eds_publication_type_facet' => ['Academic Journals'] }
       {
@@ -15,15 +14,7 @@ module QuickSearch
 
     def item_link(record)
       return get_config('doi_link') + record.eds_document_doi if record.eds_document_doi
-      get_config('url_link') + "&db=" + record.eds_database_id + "&AN=" + record.eds_accession_number
-    end
-
-    # Returns the sanitized search query entered by the user, skipping
-    # the default QuickSearch query filtering
-    def sanitized_user_search_query
-      # Need to use "to_str" as otherwise Japanese text isn't returned
-      # properly
-      sanitize(@q).to_str
+      get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
     end
 
     def items_per_page

@@ -2,14 +2,13 @@
 
 module QuickSearch
   # QuickSearch seacher for WorldCat
-  class EbscoDiscoveryServiceApiSearcher < QuickSearch::Searcher 
-
+  class EbscoDiscoveryServiceApiSearcher < QuickSearch::Searcher
     def session
       return @eds_session if @eds_session
       # Get the configuration values
       username = get_config('username')
       password = get_config('password')
-      @eds_session = EBSCO::EDS::Session.new({user: username, pass: password, profile: 'edsapi', guest: false})
+      @eds_session = EBSCO::EDS::Session.new(user: username, pass: password, profile: 'edsapi', guest: false)
       @eds_session
     end
 
@@ -43,11 +42,17 @@ module QuickSearch
     end
 
     def loaded_link
-      get_config('loaded_link') + sanitized_user_search_query
+      get_config('loaded_link') + percent_encoded_raw_user_search_query
     end
 
     def item_link(record)
-      get_config('url_link') + "&db=" + record.eds_database_id + "&AN=" + record.eds_accession_number
+      get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
+    end
+
+    # Returns the percent-encoded search query entered by the user, skipping
+    # the default QuickSearch query filtering
+    def percent_encoded_raw_user_search_query
+      CGI.escape(@q)
     end
 
     # Returns the sanitized search query entered by the user, skipping
@@ -55,7 +60,7 @@ module QuickSearch
     def sanitized_user_search_query
       # Need to use "to_str" as otherwise Japanese text isn't returned
       # properly
-      sanitize(@q).to_str.downcase 
+      sanitize(@q).to_str
     end
 
     def items_per_page
