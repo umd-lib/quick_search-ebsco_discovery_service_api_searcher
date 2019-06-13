@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QuickSearch
-  # QuickSearch seacher for WorldCat
+  # QuickSearch seacher for EBSCO Discovery Service
   class EbscoDiscoveryServiceApiSearcher < QuickSearch::Searcher
     def session
       return @eds_session if @eds_session
@@ -25,9 +25,16 @@ module QuickSearch
         result.link = item_link(record)
         result.author = record.eds_authors.join
         result.date = record.eds_publication_date
+        result.item_format = item_format(record)
         @results_list << result
       end
       @results_list[0..@per_page - 1]
+    end
+
+    # Returns the item format for the given record. Using a method so
+    # it can be overridden by subclasses.
+    def item_format(record)
+      ItemFormats.item_format(record)
     end
 
     def total
@@ -73,6 +80,33 @@ module QuickSearch
 
     def get_config(key)
       QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_CONFIG[key]
+    end
+  end
+
+  # Provides a mapping of EBSCO publication_type_ids to UMD types
+  class ItemFormats
+    # Map of EBSCO publication_types ids to UMD format, i.e.
+    # EBSCO => UMD
+    @item_formats = {
+      'audio' => 'audio',
+      'book' => 'book',
+      'ebook' => 'e_book',
+      'image' => 'image',
+      'serialPeriodical' => 'journal',
+      'journal' => 'journal',
+      'map' => 'map',
+      'score' => 'score',
+      'dissertation' => 'thesis',
+      'videoRecording' => 'video_recording'
+    }.transform_keys(&:downcase)
+
+    # Returns string representing the item format for the given record
+    def self.item_format(record)
+      item_format = @item_formats[record.eds_publication_type_id.downcase]
+
+      # Return either the item_format or default_format
+      default_format = 'other'
+      item_format || default_format
     end
   end
 end
