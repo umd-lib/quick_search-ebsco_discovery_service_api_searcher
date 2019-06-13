@@ -34,7 +34,7 @@ module QuickSearch
     # Returns the item format for the given record. Using a method so
     # it can be overridden by subclasses.
     def item_format(record)
-      ItemFormats.item_format(record)
+      EbscoItemFormats.item_format(record)
     end
 
     def total
@@ -84,7 +84,7 @@ module QuickSearch
   end
 
   # Provides a mapping of EBSCO publication_type_ids to UMD types
-  class ItemFormats
+  class EbscoItemFormats
     # Map of EBSCO publication_types ids to UMD format, i.e.
     # EBSCO => UMD
     @item_formats = {
