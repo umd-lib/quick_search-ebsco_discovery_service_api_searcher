@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QuickSearch
-  # QuickSearch seacher for WorldCat
+  # QuickSearch seacher for EBSCO Discovery Service (Articles)
   class EbscoDiscoveryServiceApiArticleSearcher < EbscoDiscoveryServiceApiSearcher
     def query_params
       article_filter = { 'eds_publication_type_facet' => ['Academic Journals'] }
