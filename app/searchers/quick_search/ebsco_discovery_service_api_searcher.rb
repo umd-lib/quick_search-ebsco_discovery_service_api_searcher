@@ -88,12 +88,13 @@ module QuickSearch
     # Map of EBSCO publication_types ids to UMD format, i.e.
     # EBSCO => UMD
     @item_formats = {
+      'academicJournal' => 'article',
       'audio' => 'audio',
       'book' => 'book',
       'ebook' => 'e_book',
       'image' => 'image',
-      'serialPeriodical' => 'journal',
       'journal' => 'journal',
+      'serialPeriodical' => 'journal',
       'map' => 'map',
       'score' => 'score',
       'dissertation' => 'thesis',
