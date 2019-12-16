@@ -60,8 +60,8 @@ module QuickSearch
       open_url_wskey = QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['world_cat_open_url_wskey']
 
       b = UmdOpenUrl::Builder.new(open_url_resolver_service_link)
-      b.custom_param('wskey', open_url_wskey).issn(issn).volume(volume).start_page(page_start)
-       .publication_date(date_published)
+      b.custom_param('wskey', open_url_wskey).issn(issn).volume(volume)
+       .issue(issue_number).start_page(page_start).publication_date(date_published)
 
       url = b.build
 
