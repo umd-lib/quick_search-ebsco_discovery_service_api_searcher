@@ -14,13 +14,21 @@ module QuickSearch
       }
     end
 
-    def item_link(record)
-      return get_config('doi_link') + record.eds_document_doi if record.eds_document_doi
+    def item_link(record) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      if record.eds_document_doi
+        Rails.logger.debug('QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - DOI link found. Returning.')
+        return get_config('doi_link') + record.eds_document_doi
+      end
 
       # Return link WorldCat OpenUrl link resolver, if available
       open_url_link = link_from_open_url(record)
-      return open_url_link if open_url_link
+      if open_url_link
+        Rails.logger.debug('QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - OpenURL link found. Returning.')
+        return open_url_link if open_url_link
+      end
 
+      # Otherwise just return link to catalog detail page
+      Rails.logger.debug('QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - Defaulting to catalog detail link.')
       get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
     end
 
@@ -53,7 +61,19 @@ module QuickSearch
       date_published = record.eds_publication_date
 
       # Return nil if the necessary parameters weren't found.
-      return nil unless issn && volume && issue_number && page_start && date_published
+      unless issn && volume && issue_number && page_start && date_published
+        Rails.logger.debug{
+          <<~LOGGER_END
+            QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.open_url_resolve_link data missing -
+            \tissn: #{issn}
+            \tvolume: #{volume}
+            \tissue_number: #{issue_number}
+            \tpage_start: #{page_start}
+            \tdate_published: #{date_published}
+          LOGGER_END
+        }
+        return nil
+      end
 
       open_url_resolver_service_link =
         QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['open_url_resolver_service_link']
