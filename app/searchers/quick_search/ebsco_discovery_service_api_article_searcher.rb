@@ -38,7 +38,14 @@ module QuickSearch
     # Returns a single URL representing the link to the DOI, or nil if
     # no DOI is available
     def doi_generator(record)
-      record.eds_document_doi
+      doi_link = record.eds_document_doi
+
+      # Return DOI link, if available
+      return nil unless doi_link
+
+      Rails.logger.debug('QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - DOI link found. Returning.')
+      doi_base_url = QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['doi_link']
+      doi_base_url + doi_link
     end
 
     # Returns a list of URLs returned by an OpenURL resolver server, or an
