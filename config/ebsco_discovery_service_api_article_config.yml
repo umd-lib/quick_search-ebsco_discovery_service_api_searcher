@@ -14,6 +14,9 @@ defaults: &defaults
   url_link: '<URL_LINK>'
   doi_link: '<DOI_LINK>'
 
+  # Citation Finder URL
+  citation_finder_link: https://umaryland.on.worldcat.org/atoztitles/link
+
   # OpenURL resolver service properties
   open_url_resolver_service_link: https://worldcat.org/webservices/kb/openurl/resolve
   world_cat_open_url_wskey: <WORLD_CAT_OPENURL_RESOLVER_WSKEY>

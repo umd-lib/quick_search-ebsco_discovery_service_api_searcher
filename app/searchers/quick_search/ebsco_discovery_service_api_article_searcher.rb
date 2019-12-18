@@ -52,7 +52,9 @@ module QuickSearch
     # Returns a URL to a citation finder server, or nil if no citation
     # finder is available
     def citation_generator(record)
-      builder = open_url_builder(record, 'https://umaryland.on.worldcat.org/atoztitles/link')
+      builder = open_url_builder(
+        record, QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['citation_finder_link']
+      )
       builder&.build
     end
 
