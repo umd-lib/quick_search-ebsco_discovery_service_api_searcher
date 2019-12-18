@@ -14,25 +14,49 @@ module QuickSearch
       }
     end
 
-    def item_link(record) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-      if record.eds_document_doi
-        Rails.logger.debug(
-          'QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - DOI link found. Returning.'
-        )
-        return get_config('doi_link') + record.eds_document_doi
+    # Returns the link to use for the given item.
+    def item_link(record)
+      doi_link = doi_generator(record)
+
+      # Return DOI link, in one exists
+      return doi_link if doi_link
+
+      # Query OpenURL resolve service for results
+      open_url_links = open_url_generator(record)
+      if open_url_links.size.positive?
+        # If there is only one result, return it
+        return open_url_links[0] if open_url_links.size == 1
+
+        # If there are multiple results, return a "Citation Finder" link
+        return citation_generator(record)
       end
 
-      # Return link WorldCat OpenUrl link resolver, if available
-      link_from_open_url = link_from_open_url(record)
-      if link_from_open_url
-        Rails.logger.debug(
-          'QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - OpenURL link found. Returning.'
-        )
-        return link_from_open_url
-      end
+      # Default -- return link to the catalog detail page
+      catalog_generator(record)
+    end
 
-      # Otherwise just return link to catalog detail page
-      Rails.logger.debug('QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.item_link - Defaulting to catalog detail link.')
+    # Returns a single URL representing the link to the DOI, or nil if
+    # no DOI is available
+    def doi_generator(record)
+      record.eds_document_doi
+    end
+
+    # Returns a list of URLs returned by an OpenURL resolver server, or an
+    # empty list if no URLs are found.
+    def open_url_generator(record)
+      open_url_link = open_url_resolve_link(record)
+      links = UmdOpenUrl::Resolver.resolve(open_url_link)
+      links
+    end
+
+    # Returns a URL to a citation finder server, or nil if no citation
+    # finder is available
+    def citation_generator(record)
+      builder = open_url_builder(record, 'https://umaryland.on.worldcat.org/atoztitles/link')
+      builder&.build
+    end
+
+    def catalog_generator(record)
       get_config('url_link') + '&db=' + record.eds_database_id + '&AN=' + record.eds_accession_number
     end
 
@@ -48,85 +72,31 @@ module QuickSearch
       QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG[key]
     end
 
-    def link_from_open_url(record)
-      # Generate the link to the WorldCat OpenUrl Resolver
-      open_url_link = open_url_resolve_link(record)
-      json = UmdOpenUrl::Resolver.resolve(open_url_link)
-      links = UmdOpenUrl::Resolver.parse_response(json)
+    # Returns an OpenUrlBuilder populated with information from the given
+    # record and link
+    def open_url_builder(record, link)
+      builder = UmdOpenUrl::Builder.new(link)
+      builder.issn(record.eds_issns&.first)
+             .volume(record.eds_volume)
+             .issue(record.eds_issue)
+             .start_page(record.eds_page_start)
+             .publication_date(record.eds_publication_date)
 
-      return nil if links.nil? || links.size.zero?
-
-      if links.size == 1
-        Rails.logger.debug(
-          'QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.link_from_open_url - '\
-          'Single OpenURL resolved link found. Returning.'
-        )
-        return links[0]
-      else
-        Rails.logger.debug(
-          'QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.link_from_open_url - '\
-          "#{links.size} OpenURL resolved links found. Returning link to citation finder"
-        )
-        open_url_link_uri = URI.parse(open_url_link)
-        params_map = CGI.parse(open_url_link_uri.query)
-        filtered_params_map = params_map.reject { |k, _v| k == 'wskey' }
-
-        # Regenerate the query parameters string. Using Rack::Utils.build_query
-        # because it produces a query string without array-based parameters
-        filtered_params = Rack::Utils.build_query(filtered_params_map)
-
-        filtered_params = nil if filtered_params.strip.empty?
-
-        # Construct the link to the resource
-        citiation_finder_uri = URI::HTTP.build(
-          host: 'umaryland.on.worldcat.org',
-          path: '/atoztitles/link',
-          query: filtered_params
-        )
-        citiation_finder_uri.scheme = 'https'
-        citiation_finder_url = citiation_finder_uri.to_s
-        citiation_finder_url
-      end
+      builder
     end
 
-    def open_url_resolve_link(record) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-      issn = record.eds_issns&.first
-      volume = record.eds_volume
-      issue_number = record.eds_issue
-      page_start = record.eds_page_start
-      date_published = record.eds_publication_date
-
-      Rails.logger.debug do
-        <<~LOGGER_END
-          QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.open_url_resolve_link
-          \tissn: #{issn}
-          \tvolume: #{volume}
-          \tissue_number: #{issue_number}
-          \tpage_start: #{page_start}
-          \tdate_published: #{date_published}
-        LOGGER_END
-      end
-
-      # Return nil if the necessary parameters weren't found.
-      unless issn && volume && issue_number && page_start && date_published
-        Rails.logger.debug do
-          'QuickSearch::EbscoDiscoveryServiceApiArticleSearcher.open_url_resolve_link data missing. Returning nil'
-        end
-
-        return nil
-      end
-
+    def open_url_resolve_link(record)
       open_url_resolver_service_link =
         QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['open_url_resolver_service_link']
+      builder = open_url_builder(record, open_url_resolver_service_link)
+      return nil unless builder
+
       open_url_wskey = QuickSearch::Engine::EBSCO_DISCOVERY_SERVICE_API_ARTICLE_CONFIG['world_cat_open_url_wskey']
+      builder.custom_param('wskey', open_url_wskey)
 
-      b = UmdOpenUrl::Builder.new(open_url_resolver_service_link)
-      b.custom_param('wskey', open_url_wskey).issn(issn).volume(volume)
-       .issue(issue_number).start_page(page_start).publication_date(date_published)
+      return nil unless builder.valid?(%i[wskey issn volume issue start_page publication_date])
 
-      url = b.build
-
-      url
+      builder.build
     end
   end
 end
