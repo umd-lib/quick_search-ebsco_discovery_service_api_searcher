@@ -3,6 +3,7 @@ require_relative 'boot'
 require 'rails/all'
 
 Bundler.require(*Rails.groups)
+require 'quick_search'
 require "quick_search/ebsco_discovery_service_api_searcher"
 
 module Dummy
