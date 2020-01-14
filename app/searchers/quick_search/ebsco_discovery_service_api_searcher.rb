@@ -5,6 +5,7 @@ module QuickSearch
   class EbscoDiscoveryServiceApiSearcher < QuickSearch::Searcher
     def session
       return @eds_session if @eds_session
+
       # Get the configuration values
       username = get_config('username')
       password = get_config('password')
@@ -18,6 +19,7 @@ module QuickSearch
 
     def results # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
       return results_list[0..@per_page - 1] if results_list
+
       @results_list = []
       @response.records.each do |record|
         result = OpenStruct.new
