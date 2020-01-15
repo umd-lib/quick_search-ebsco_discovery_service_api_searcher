@@ -18,9 +18,12 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,db,lib}/**/*', 'LICENSE', 'Rakefile', 'README.md']
 
-  s.add_dependency 'quick_search-core', '~> 0'
   s.add_dependency 'ebsco-eds', '~> 1.0.7'
-  s.add_development_dependency 'rubocop', '= 0.52.1'
+  s.add_dependency 'quick_search-core', '~> 0'
+  s.add_dependency 'umd_open_url'
+
+  s.add_development_dependency 'rubocop', '= 0.78.0'
+  s.add_development_dependency 'rubocop-rails'
   # sqlite3 loaded for testing with the "dummy" application
   s.add_development_dependency 'sqlite3'
 end

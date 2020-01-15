@@ -1,16 +1,16 @@
-# Enables Rails cops
-Rails:
-  Enabled: true
- 
+require:
+  - rubocop-rails
+
 # Don't require gems in Gemfile to be in alphabetical order.
 Bundler/OrderedGems:
   Enabled: false
- 
+
 # Exclude auto-generated files
 AllCops:
   Include:
     - '**/Gemfile'
     - '**/Rakefile'
+    - 'app/**/*'
   Exclude:
     - 'bin/*'
     - 'config/initializers/*'
@@ -20,26 +20,26 @@ AllCops:
     - 'lib/**/*'
     - 'db/seeds.rb'
     - 'test/dummy/**/*'
- 
-  TargetRubyVersion: 2.3.7
-  TargetRailsVersion: 5.0
- 
+
+  TargetRubyVersion: 2.6
+  TargetRailsVersion: 5.2
+
 # Increase max allowed line length
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
- 
+
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
- 
+
 Metrics/BlockLength:
   Exclude:
     - 'test/**/*'
- 
+
 Metrics/ModuleLength:
   Exclude:
     - 'test/**/*'
- 
+
 # The following configuration exclude checks that seem
 # silly, or conflict with the way Rails naturally does
 # things.
@@ -50,14 +50,14 @@ Style/Documentation:
     - 'test/test_helper.rb'
     - 'test/controllers/*_controller_test.rb'
     - 'test/helpers/*_helper_test.rb'
- 
+
 Style/ClassAndModuleChildren:
   Exclude:
     - 'test/test_helper.rb'
- 
+
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
- 
+  EnforcedStyle: indented_internal_methods
+
 Naming/FileName:
   Exclude:
     - quick_search-ebsco_discovery_service_api_searcher.gemspec
